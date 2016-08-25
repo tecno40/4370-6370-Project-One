@@ -4,11 +4,12 @@
  *
  * @author   John Miller
  */
-
+package edu.uga.cs.cs4370;
 import java.io.*;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+
 import static java.lang.Boolean.*;
 import static java.lang.System.out;
 
@@ -21,10 +22,6 @@ import static java.lang.System.out;
 public class Table
            implements Serializable
 {
-    
-    //public static final String ROOT_DIR="C:\\Users\\Trent\\Documents\\NetBeansProjects\\DBProject1\\output\\";
-    public static final String ROOT_DIR="";
-    
     /** Relative path for storage directory
      */
     private static final String DIR = "store" + File.separator;
@@ -84,8 +81,7 @@ public class Table
 	key       = _key;
 	tuples    = new ArrayList <> ();
 	index     = new TreeMap <> ();       // also try BPTreeMap, LinHashMap or ExtHashMap
-	//index     = new LinHashMap <> (KeyType.class, Comparable [].class);
-	//index = new HashMap<>(KeyType.class, Comparable [].class);
+	// index     = new LinHashMap <> (KeyType.class, Comparable [].class);
 
     } // constructor
 
@@ -138,31 +134,14 @@ public class Table
      */
     public Table project (String attributes)
     {
-        Comparable[] newTuple;
-        Comparable[] originalTuple;
-        int[] colPositions;
-        List <Comparable []> rows = new ArrayList <> ();
-        
-        out.println ("RA> " + name + ".project (" + attributes + ")");
-        String [] attrs     = attributes.split (" ");
-        colPositions=match (attrs);
-	Class []  colDomain = extractDom (colPositions, domain);
+	out.println ("RA> " + name + ".project (" + attributes + ")");
+	String [] attrs     = attributes.split (" ");
+	Class []  colDomain = extractDom (match (attrs), domain);
 	String [] newKey    = (Arrays.asList (attrs).containsAll (Arrays.asList (key))) ? key : attrs;
 
+	List <Comparable []> rows = new ArrayList <> ();
+
 	//  T O   B E   I M P L E M E N T E D
-        for (int i=0;i<tuples.size();i++)
-        {
-            newTuple=new Comparable[attrs.length];
-            originalTuple=tuples.get(i);
-            
-            for (int j=0;j<colPositions.length;j++)
-            {
-                newTuple[j]=originalTuple[j];
-                
-            }
-            rows.add(newTuple);
-        }
-        
 
 	return new Table (name + count++, attrs, colDomain, newKey, rows);
     } // project
@@ -198,11 +177,10 @@ public class Table
 	List <Comparable []> rows = new ArrayList <> ();
 
 	//  T O   B E   I M P L E M E N T E D
-	rows.add(this.index.get(keyVal));
-	
+
 	return new Table (name + count++, attribute, domain, key, rows);
     } // select
-    
+
     /************************************************************************************
      * Union this table and table2.  Check that the two tables are compatible.
      *
@@ -217,8 +195,35 @@ public class Table
 	if (! compatible (table2)) return null;
 
 	List <Comparable []> rows = new ArrayList <> ();
+		if(compatible(table2)){//if compatible then do the operation
+			for(Comparable[] temp1 : tuples){//adds all tuples from table 1
+				rows.add(temp1);
+			}
+			for(Comparable[] temp1 : table2.tuples){//adds tuple from table 2, also checks for duplicates
+				boolean unique = true;
+				for(Comparable[] temp2 : tuples){
+					if(temp1.equals(temp2)){
+						unique = false;
+					}
+				}
+				if(unique == true){
+					rows.add(temp1);
+				}
+			}
+		}
 
-	//  T O   B E   I M P L E M E N T E D
+/*
+ 		Table t = new Table (name + count++, attribute, domain, key, rows2);
+		for (int i = 0; i<rows.size(); i++){
+			//t.insert will automatically add that value to the table's index as well
+			t.insert(rows.get(i));
+		}
+*/
+
+		Table t = new Table (name + count++, attribute, domain, key, rows);
+		t.print();
+
+		//  T O   B E   I M P L E M E N T E D
 
 	return new Table (name + count++, attribute, domain, key, rows);
     } // union
@@ -354,7 +359,7 @@ public class Table
      *
      *@return a new Arraylist copy of the table's tuples
      */
-    public List<Comparable []> getTuples()
+    public List getTuples()
     {
 	List<Comparable []> _tuples = new ArrayList<>();
 	_tuples = this.tuples.stream().collect(Collectors.toList());
@@ -408,7 +413,7 @@ public class Table
     {
 	Table tab = null;
 	try {
-	    ObjectInputStream ois = new ObjectInputStream (new FileInputStream (ROOT_DIR + DIR + name + EXT));
+	    ObjectInputStream ois = new ObjectInputStream (new FileInputStream (DIR + name + EXT));
 	    tab = (Table) ois.readObject ();
 	    ois.close ();
 	} catch (IOException ex) {
@@ -427,7 +432,7 @@ public class Table
     public void save ()
     {
 	try {
-	    ObjectOutputStream oos = new ObjectOutputStream (new FileOutputStream (ROOT_DIR + DIR + name + EXT));
+	    ObjectOutputStream oos = new ObjectOutputStream (new FileOutputStream (DIR + name + EXT));
 	    oos.writeObject (this);
 	    oos.close ();
 	} catch (IOException ex) {
@@ -556,18 +561,5 @@ public class Table
 
 	return obj;
     } // extractDom
-
-    public boolean equals(Table other){
-
-	boolean found = false;
-	for(Comparable[] movie : this.tuples){
-	    found = false;
-	    for(Comparable [] other_movie : other.getTuples()){
-		if(movie.equals(other_movie)) found = true;
-	    }
-	    if(!found) return false;
-	}
-	return true;	
-    } 
 
 } // Table class

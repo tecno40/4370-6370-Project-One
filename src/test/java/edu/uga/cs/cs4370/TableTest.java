@@ -2,7 +2,8 @@
  *@file TableTest.java
  *
  *@author Nick Klepp, Trent Walls, Jason Vinson, Theresa Miller
- */
+ *//*
+
 
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -101,7 +102,8 @@ public class TableTest extends TestCase{
     @Test
     public void testMinus(){
 
-	/*
+	*/
+/*
 	Table movie = new Table ("movie", "title year length genre studioName producerNo",
 				 "String Integer Integer String String Integer", "title year");
 
@@ -128,7 +130,8 @@ public class TableTest extends TestCase{
 
 	movie3.insert(film2);
 	movie3.insert(film3);
-	movie3.print();*/
+	movie3.print();*//*
+
 
 	Table newMovie=movie.minus(movie2);
 	//newMovie.print();
@@ -148,3 +151,4 @@ public class TableTest extends TestCase{
     } 
     
 }
+*/
